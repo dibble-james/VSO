@@ -50,14 +50,15 @@ Process {
     ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
     {
         $parameterName = $deploymentParameter.Name -replace "[^a-zA-Z0-9]", ""
+        $parameterNameUpper = $parameterName.ToUpper()
 
         # Default the parameter value to the default value in SetParameters.xml
         $parameterValue = $deploymentParameter.Value
 
         # Try getting the parameter from environment variables 
-        if($MergeBuildVariables -and $environmentVariables[$parameterName.ToUpper()])
+        if($MergeBuildVariables -and (Test-Path Env:$parameterNameUpper))
         {
-            $parameterValue = $environmentVariables[$parameterName.ToUpper()]
+            $parameterValue = (Get-Item Env:$parameterNameUpper).Value
         }
 
         # Explicit deployment parameter trumps all
