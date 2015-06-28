@@ -14,7 +14,7 @@ Write-Host -Foreground Green "Deploying $WebDeployPackage"
 
 Add-PSSnapin WDeploySnapin3.0
 
-$packageParameters = Get-WDParameters $WebDeployPackage
+$deploymentParameters = Get-WDParameters $WebDeployPackage
 
 if($PackageParameters)
 {
@@ -22,19 +22,19 @@ if($PackageParameters)
 	            
 	ForEach($deploymentValue in  $deploymentValuesAsHashTable.GetEnumerator())
 	{
-		if(!$packageParameters.ContainsKey($deploymentValue.Name))
+		if(!$deploymentParameters.ContainsKey($deploymentValue.Name))
 		{
 			Write-Host -Foreground Red "Package does not contain parameter $($deploymentValue.Name)"
 			Exit 1
 		}
 
-	    $packageParameters[$deploymentValue.Name] = $deploymentValue.Value
+	    $deploymentParameters[$deploymentValue.Name] = $deploymentValue.Value
 	}	
 }
 
-$packageParameters['IIS Web Application Name'] = $VirtualDirectory
+$deploymentParameters['IIS Web Application Name'] = $VirtualDirectory
 
-$packageParametersVerbose = ($packageParameters | Out-String)
+$packageParametersVerbose = ($deploymentParameters | Out-String)
 
 Write-Verbose "Package Parameters $packageParametersVerbose" 
 
@@ -50,7 +50,7 @@ ForEach($destination in $PackageDestinations.Split(','))
 
 		Write-Verbose "Using $settingsFilename"
 
-		Restore-WDPackage -Package $WebDeployPackage -Verbose -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $packageParameters
+		Restore-WDPackage -Package $WebDeployPackage -Verbose -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $deploymentParameters
 
 		Write-Host -Foreground Green "Sucessfully Deployed to $destination"
 	}
