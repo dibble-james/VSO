@@ -6,58 +6,77 @@ param(
 	[Parameter(Mandatory)][string] $WebDeployUser,
 	[Parameter(Mandatory)][string] $WebDeployPassword,
     [string] $AgentType = "MSDepSvc",
-	[Switch] $AllowUntrusted,
-	[string] $PackageParameters
+	[Switch] $AllowUntrusted
 )
 
-Write-Host -Foreground Green "Deploying $WebDeployPackage"
+DynamicParam {
+    Add-PSSnapin WDeploySnapin3.0
 
-Add-PSSnapin WDeploySnapin3.0
+    $deploymentParameters = Get-WDParameters $WebDeployPackage
 
-$deploymentParameters = Get-WDParameters $WebDeployPackage
+    $paramDictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
 
-if($PackageParameters)
-{
-	$deploymentValuesAsHashTable = ConvertFrom-StringData $PackageParameters
-	            
-	ForEach($deploymentValue in  $deploymentValuesAsHashTable.GetEnumerator())
-	{
-		if(!$deploymentParameters.ContainsKey($deploymentValue.Name))
-		{
-			Write-Host -Foreground Red "Package does not contain parameter $($deploymentValue.Name)"
-			Exit 1
-		}
+    ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
+    {
+        $dynamicPackageParameterAttribute = New-Object System.Management.Automation.ParameterAttribute
+        $attributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
+        $attributeCollection.Add($dynamicPackageParameterAttribute)
+        $dynamicPackageParameter = New-Object System.Management.Automation.RuntimeDefinedParameter($deploymentParameter.Name, [string], $attributeCollection)
+        
+        $paramDictionary.Add($deploymentParameter.Name, $dynamicPackageParameter)
+    }
 
-	    $deploymentParameters[$deploymentValue.Name] = $deploymentValue.Value
-	}	
-}
+    return $paramDictionary
+} 
 
-$deploymentParameters['IIS Web Application Name'] = $VirtualDirectory
+Process {
+    Write-Host -Foreground Green "Deploying $WebDeployPackage"
 
-$packageParametersVerbose = ($deploymentParameters | Out-String)
+    Add-PSSnapin WDeploySnapin3.0
 
-Write-Verbose "Package Parameters $packageParametersVerbose" 
+    $deploymentParameters = Get-WDParameters $WebDeployPackage
 
-ForEach($destination in $PackageDestinations.Split(','))
-{
-	try
-	{
-		Write-Host -Foreground Green "Deploying to $destination/$VirtualDirectory"
+    $mergedDeploymentParameters = @{};
 
-		$settingsFilename = "$WebDeployPackage.$destination.publishsettings"
+    ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
+    {
+        if($PsBoundParameters[$deploymentParameter.Name])
+        {
+            $mergedDeploymentParameters[$deploymentParameter.Name] = $PsBoundParameters[$deploymentParameter.Name]
+        }
+        else
+        {
+            $mergedDeploymentParameters[$deploymentParameter.Name] = $deploymentParameter.Value
+        }
+    }
 
-		New-WDPublishSettings -AllowUntrusted -EncryptPassword -ComputerName $destination -UserId $WebDeployUser -Password $WebDeployPassword -FileName "$settingsFilename" -AgentType $AgentType
+    $mergedDeploymentParameters['IIS Web Application Name'] = $VirtualDirectory
 
-		Write-Verbose "Using $settingsFilename"
+    $packageParametersVerbose = ($mergedDeploymentParameters | Out-String)
 
-		Restore-WDPackage -Package $WebDeployPackage -Verbose -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $deploymentParameters
+    Write-Verbose "Package Parameters $packageParametersVerbose" 
 
-		Write-Host -Foreground Green "Sucessfully Deployed to $destination"
-	}
-	catch
-	{
-		Write-Host -Foreground Red "Failed to deploy to $destination`n$_"
+    ForEach($destination in $PackageDestinations.Split(','))
+    {
+        try
+        {
+            Write-Host -Foreground Green "Deploying to $destination/$VirtualDirectory"
 
-		Exit 1
-	}
+            $settingsFilename = "$WebDeployPackage.$destination.publishsettings"
+
+            New-WDPublishSettings -AllowUntrusted -EncryptPassword -ComputerName $destination -UserId $WebDeployUser -Password $WebDeployPassword -FileName "$settingsFilename" -AgentType $AgentType
+
+            Write-Verbose "Using $settingsFilename"
+
+            Restore-WDPackage -Package $WebDeployPackage -Verbose -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $mergedDeploymentParameters
+
+            Write-Host -Foreground Green "Sucessfully Deployed to $destination"
+        }
+        catch
+        {
+            Write-Host -Foreground Red "Failed to deploy to $destination`n$_"
+
+            Exit 1
+        }
+    }
 }
