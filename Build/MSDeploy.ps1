@@ -18,7 +18,7 @@ DynamicParam {
 
     ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
     {
-        $parameterName = ([System.Text.RegularExpressions.Regex]::Replace($deploymentParameter.Name, "[^a-zA-Z0-9]", ""))
+        $parameterName = $deploymentParameter.Name -replace "[^a-zA-Z0-9]", ""
 
         $dynamicPackageParameterAttribute = New-Object System.Management.Automation.ParameterAttribute
         $attributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
@@ -42,7 +42,7 @@ Process {
 
     ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
     {
-        $parameterName = ([System.Text.RegularExpressions.Regex]::Replace($deploymentParameter.Name, "[^a-zA-Z0-9]", ""))
+        $parameterName = $deploymentParameter.Name -replace "[^a-zA-Z0-9]", ""
 
         if($PsBoundParameters[$parameterName])
         {
