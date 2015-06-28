@@ -1,12 +1,12 @@
 [CmdletBinding()]
 param(
-	[Parameter(Mandatory)][string] $WebDeployPackage,
-	[Parameter(Mandatory)][string] $PackageDestinations,
-	[Parameter(Mandatory)][string] $VirtualDirectory,
-	[Parameter(Mandatory)][string] $WebDeployUser,
-	[Parameter(Mandatory)][string] $WebDeployPassword,
+    [Parameter(Mandatory)][string] $WebDeployPackage,
+    [Parameter(Mandatory)][string] $PackageDestinations,
+    [Parameter(Mandatory)][string] $VirtualDirectory,
+    [Parameter(Mandatory)][string] $WebDeployUser,
+    [Parameter(Mandatory)][string] $WebDeployPassword,
     [string] $AgentType = "MSDepSvc",
-	[Switch] $AllowUntrusted,
+    [Switch] $AllowUntrusted,
     [Switch] $MergeBuildVariables
 )
 
