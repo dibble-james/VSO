@@ -16,9 +16,9 @@ Add-PSSnapin WDeploySnapin3.0
 
 $packageParameters = Get-WDParameters $WebDeployPackage
 
-if($WebDeployParameters)
+if($PackageParameters)
 {
-	$deploymentValuesAsHashTable = ConvertFrom-StringData $WebDeployParameters
+	$deploymentValuesAsHashTable = ConvertFrom-StringData $PackageParameters
 	            
 	ForEach($deploymentValue in  $deploymentValuesAsHashTable.GetEnumerator())
 	{
