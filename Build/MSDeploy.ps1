@@ -7,7 +7,7 @@ param(
 	[Parameter(Mandatory)][string] $WebDeployPassword,
     [string] $AgentType = "MSDepSvc",
 	[Switch] $AllowUntrusted,
-	[string] $WebDeployParameters
+	[string] $PackageParameters
 )
 
 Write-Host -Foreground Green "Deploying $WebDeployPackage"
