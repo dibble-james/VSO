@@ -6,7 +6,8 @@ param(
 	[Parameter(Mandatory)][string] $WebDeployUser,
 	[Parameter(Mandatory)][string] $WebDeployPassword,
     [string] $AgentType = "MSDepSvc",
-	[Switch] $AllowUntrusted
+	[Switch] $AllowUntrusted,
+    [Switch] $MergeBuildVariables
 )
 
 DynamicParam {
@@ -38,20 +39,34 @@ Process {
 
     $deploymentParameters = Get-WDParameters $WebDeployPackage
 
+    $environmentVariables = Get-ChildItem Env:
+
+    $environmentVariablesVerbose = ($environmentVariables | Out-String)
+
+    Write-Verbose "Environment Variables Parameters $environmentVariablesVerbose" 
+
     $mergedDeploymentParameters = @{};
 
     ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
     {
         $parameterName = $deploymentParameter.Name -replace "[^a-zA-Z0-9]", ""
 
+        # Default the parameter value to the default value in SetParameters.xml
+        $parameterValue = $deploymentParameter.Value
+
+        # Try getting the parameter from environment variables 
+        if($MergeBuildVariables -and $environmentVariables[$parameterName])
+        {
+            $parameterValue = $environmentVariables[$parameterName]
+        }
+
+        # Explicit deployment parameter trumps all
         if($PsBoundParameters[$parameterName])
         {
-            $mergedDeploymentParameters[$deploymentParameter.Name] = $PsBoundParameters[$parameterName]
+            $parameterValue = $PsBoundParameters[$parameterName]
         }
-        else
-        {
-            $mergedDeploymentParameters[$deploymentParameter.Name] = $deploymentParameter.Value
-        }
+        
+        $mergedDeploymentParameters[$deploymentParameter.Name] = $parameterValue
     }
 
     $mergedDeploymentParameters['IIS Web Application Name'] = $VirtualDirectory
