@@ -55,9 +55,9 @@ Process {
         $parameterValue = $deploymentParameter.Value
 
         # Try getting the parameter from environment variables 
-        if($MergeBuildVariables -and $environmentVariables[$parameterName])
+        if($MergeBuildVariables -and $environmentVariables[$parameterName.ToUpper()])
         {
-            $parameterValue = $environmentVariables[$parameterName]
+            $parameterValue = $environmentVariables[$parameterName.ToUpper()]
         }
 
         # Explicit deployment parameter trumps all
