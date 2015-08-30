@@ -9,6 +9,7 @@ param(
 )
 
 choco install OctopusTools -y
+choco install nuget.commandline -y
 
 mkdir "$DropDirectory" -f
 
@@ -16,4 +17,4 @@ octo pack --id $PackageId --version $PackageVersion --basePath "$PackageFromDire
 
 $packageName = "$DropDirectory\$PackageId" + ".$PackageVersion" + ".nupkg"
 
-..\.nuget\nuget.exe push $packageName -Source "$OctopusServer" -ApiKey "$OctopusApiKey"
+nuget push $packageName -Source "$OctopusServer" -ApiKey "$OctopusApiKey"
