@@ -81,7 +81,7 @@ if($files)
     foreach ($file in $files) {
         $filecontent = Get-Content($file)
         attrib $file -r
-        $filecontent -replace $VersionRegex, $NewVersion | Out-File $file
+        $filecontent -replace $VersionRegex, $NewVersion | Out-File -Encoding "UTF8" $file
         Write-Verbose "$file.FullName - version applied"
     }
 }
