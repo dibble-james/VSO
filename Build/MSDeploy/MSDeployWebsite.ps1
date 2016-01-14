@@ -14,8 +14,11 @@ import-module "Microsoft.TeamFoundation.DistributedTask.Task.Common"
 import-module "Microsoft.TeamFoundation.DistributedTask.Task.DevTestLabs" 
 Import-Module "Microsoft.TeamFoundation.DistributedTask.Task.Deployment.Internal" 
 
-Write-Host -Foreground Green "Deploying $WebDeployPackage"
+Write-Output "Deploying $WebDeployPackage"
 Write-Verbose "PackageDestinations = $PackageDestinations" -Verbose
+Write-Verbose "VirtualDirectory = $VirtualDirectory" -Verbose
+Write-Verbose "PackageParameters = $PackageParameters" -Verbose
+Write-Verbose "AgentType = $AgentType" -Verbose
 Write-Verbose "AllowUntrusted = $AllowUntrusted" -Verbose
 Write-Verbose "MergeBuildVariables = $MergeBuildVariables" -Verbose
 
@@ -26,13 +29,31 @@ $resourceFQDNKeyName = Get-ResourceFQDNTagKey
 $skipCaCheck = $AllowUntrusted -eq "true"
 $useEnvironmentVariables = $MergeBuildVariables -eq "true"
 
+$explicitParameters = @{};
+
+if(-Not [string]::IsNullOrEmpty($PackageParameters))
+{
+    $packageParametersAsList = $PackageParameters -split '[\r\n]'
+
+    ForEach($packageParameter in $packageParametersAsList)
+    {
+        $split = $packageParameter -split "=",2
+
+        $explicitParameters.Add($split[0], $split[1]);
+    }
+}
+
+$explicitParametersVerbose = ($explicitParameters | Out-String)
+
+Write-Verbose "Explicit Package Parameters $explicitParametersVerbose" -Verbose
+
 $deploymentParameters = Get-WDParameters $WebDeployPackage
 
 $environmentVariables = Get-ChildItem Env:
 
 $environmentVariablesVerbose = ($environmentVariables | Out-String)
 
-Write-Verbose "Environment Variables Parameters $environmentVariablesVerbose" 
+Write-Verbose "Environment Variables Parameters $environmentVariablesVerbose" -Verbose
 
 $mergedDeploymentParameters = @{};
 
@@ -48,6 +69,12 @@ ForEach($deploymentParameter in $deploymentParameters.GetEnumerator())
     if($useEnvironmentVariables -and (Test-Path Env:$parameterNameUpper))
     {
         $parameterValue = (Get-Item Env:$parameterNameUpper).Value
+    }
+
+    # If it exists in the explicit parameters we want to use that
+    if($explicitParameters.ContainsKey($parameterName))
+    {
+        $parameterValue = $explicitParameters[$parameterName];
     }
 
     $mergedDeploymentParameters[$deploymentParameter.Name] = $parameterValue
@@ -95,7 +122,7 @@ $mergedDeploymentParameters['IIS Web Application Name'] = $VirtualDirectory
 
 $packageParametersVerbose = ($mergedDeploymentParameters | Out-String)
 
-Write-Verbose "Package Parameters $packageParametersVerbose" 
+Write-Verbose "Package Parameters $packageParametersVerbose" -Verbose
 $connection = Get-VssConnection -TaskContext $distributedTaskContext
 
 # This is temporary fix for filtering 
@@ -123,7 +150,7 @@ foreach($resource in $resources)
 
     try
     {
-        Write-Host -Foreground Green "Deploying to $machine/$VirtualDirectory using $AgentType"
+        Write-Output "Deploying to $machine/$VirtualDirectory using $AgentType"
 
         $settingsFilename = "$WebDeployPackage.$machine.publishsettings"
 
@@ -131,13 +158,13 @@ foreach($resource in $resources)
 
         Write-Verbose "Using $settingsFilename" -Verbose
 
-        Restore-WDPackage -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $mergedDeploymentParameters 4> Write-Host
+        Restore-WDPackage -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $mergedDeploymentParameters -Verbose
 
-        Write-Host -Foreground Green "Sucessfully Deployed to $machine"
+        Write-Output "Sucessfully Deployed to $machine"
     }
     catch
     {
-        Write-Host -Foreground Red "Failed to deploy to $machine`n$_"
+        Write-Output "Failed to deploy to $machine//$VirtualDirectory`n$_"
 
         Exit 1
     }
