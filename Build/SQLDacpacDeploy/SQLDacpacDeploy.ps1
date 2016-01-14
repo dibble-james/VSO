@@ -8,10 +8,10 @@ param(
     [Parameter()][string] $AdditonalParameters
 )
 
-import-module "Microsoft.TeamFoundation.DistributedTask.Task.Internal" 
-import-module "Microsoft.TeamFoundation.DistributedTask.Task.Common" 
-import-module "Microsoft.TeamFoundation.DistributedTask.Task.DevTestLabs" 
-Import-Module "Microsoft.TeamFoundation.DistributedTask.Task.Deployment.Internal" 
+# import-module "Microsoft.TeamFoundation.DistributedTask.Task.Internal" 
+# import-module "Microsoft.TeamFoundation.DistributedTask.Task.Common" 
+# import-module "Microsoft.TeamFoundation.DistributedTask.Task.DevTestLabs" 
+# Import-Module "Microsoft.TeamFoundation.DistributedTask.Task.Deployment.Internal" 
 
 Write-Output "Deploying $Dacpac"
 Write-Verbose "PackageDestinations = $PackageDestinations" -Verbose
@@ -93,3 +93,13 @@ Write-Verbose "AdditonalParameters = $AdditonalParameters" -Verbose
 #         throw "Failed to deploy to $machine/$Database"
 #     }
 # }
+
+$sqlUser = '';
+$sqlPassword = '';
+$sqlServer = '';
+
+$targetScript = "$sqlServer-Update.sql";
+
+Start-Process sqlpackage -Verbose -NoNewWindow -PassThru -Wait -ArgumentList "/a:Script /op:$targetScript /sf:$Dacpac /TargetServerName:$sqlServer /TargetDatabaseName:$Database /TargetUser:$sqlUser /TargetPassword:$sqlPassword"
+
+Start-Process sqlcmd -Verbose -NoNewWindow -PassThru -Wait -ArgumentList "-S $sqlServer -d $Database -U $sqlUser -P $sqlPassword -i $targetScript"
