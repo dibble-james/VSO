@@ -1,0 +1,84 @@
+{
+  "id": "ffe7ae29-74ee-46fa-bdae-87c0b481e4c5",
+  "name": "MSDeplopy",
+  "friendlyName": "MSDeplopy",
+  "description": "Use MSDeplopy to deploy Web Deploy to remote machine",
+  "author": "James Dibble",
+  "category": "Deploy",
+  "visibility": [
+    "Release"
+  ],
+  "demands": [ ],
+  "version": {
+    "Major": "0",
+    "Minor": "1",
+    "Patch": "13"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "instanceNameFormat": "Deploy Web Package: $(WebDeployPackage)",
+  "inputs": [
+    {
+      "name": "WebDeployPackage",
+      "type": "filePath",
+      "label": "Web Deploy Package",
+      "required": true
+    },
+    {
+      "name": "PackageDestinations",
+      "type": "pickList",
+      "label": "Deployment Machine Group",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "AgentType",
+      "type": "radio",
+      "label": "Web Deploy Agent Type",
+      "required": true,
+      "defaultValue": "MSDepSvc",
+      "options": {
+        "MSDepSvc": "MS Deploy Service",
+        "wmsvc": "Web Management Service"
+      }
+    },
+    {
+      "name": "VirtualDirectory",
+      "type": "string",
+      "label": "Virtual Directory",
+      "required": true
+    },
+    {
+      "name": "PackageParameters",
+      "type": "multiLine",
+      "label": "Package Parameters",
+      "required": false
+    },
+    {
+      "name": "MergeBuildVariables",
+      "type": "boolean",
+      "label": "Merge Environment Variables",
+      "required": false
+    },
+    {
+      "name": "AllowUntrusted",
+      "type": "boolean",
+      "label": "Allow Untrusted",
+      "required": false
+    }
+  ],
+  "sourceDefinitions": [
+    {
+      "target": "PackageDestinations",
+      "endpoint": "/$(system.teamProject)/_apis/vslabs/environments",
+      "selector": "jsonpath:$.value[*].name",
+      "authKey": "tfs:DevTestLabs"
+    }
+  ],
+  "execution": {
+    "PowerShell": {
+      "target": "$(currentDirectory)\\MSDeployWebsite.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(currentDirectory)"
+    }
+  }
+}
