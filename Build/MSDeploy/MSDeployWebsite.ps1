@@ -4,6 +4,8 @@ param(
     [Parameter(Mandatory)][string] $PackageDestinations,
     [Parameter(Mandatory)][string] $VirtualDirectory,
     [Parameter()][string] $PackageParameters,
+    [Parameter()][string] $ResourceFilteringMethod,
+    [Parameter()][string] $ResourceFilter,
     [Parameter()][string] $AgentType = "MSDepSvc",
     [Parameter()][string] $AllowUntrusted,
     [Parameter()][string] $MergeBuildVariables
@@ -127,7 +129,7 @@ $connection = Get-VssConnection -TaskContext $distributedTaskContext
 
 # This is temporary fix for filtering 
 Write-Verbose "Starting Register-Environment cmdlet call for environment : $PackageDestinations" -Verbose
-$environment = Register-Environment -EnvironmentName $PackageDestinations -EnvironmentSpecification $PackageDestinations -Connection $connection -TaskContext $distributedTaskContext
+$environment = Register-Environment -EnvironmentName $PackageDestinations -EnvironmentSpecification $PackageDestinations -Connection $connection -TaskContext $distributedTaskContext -ResourceFilter $ResourceFilter
 Write-Verbose "Completed Register-Environment cmdlet call for environment : $PackageDestinations" -Verbose
 
 Write-Verbose "Starting Get-EnvironmentResources cmdlet call on environment name: $PackageDestinations" -Verbose
@@ -164,8 +166,6 @@ foreach($resource in $resources)
     }
     catch
     {
-        Write-Output "Failed to deploy to $machine//$VirtualDirectory`n$_"
-
-        Exit 1
+        throw "Failed to deploy to $machine//$VirtualDirectory"
     }
 }
