@@ -1,0 +1,70 @@
+{
+  "id": "26cb283b-04ba-4e27-bc03-35ba9afb3948",
+  "name": "Mage",
+  "friendlyName": "Update ClickOnce Manifest",
+  "description": "Update ClickOnce Manifest",
+  "author": "James Dibble",
+  "category": "Deploy",
+  "visibility": [
+    "Release"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "0",
+    "Minor": "1",
+    "Patch": "2"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "instanceNameFormat": "Update ClickOnce Manifest",
+  "inputs": [
+    {
+      "name": "Manifest",
+      "type": "string",
+      "label": "Deployment Manifest",
+      "required": true,
+      "helpMarkdown": "File name uses in recursive search from working directory"
+    },
+        {
+      "name": "AppManifest",
+      "type": "string",
+      "label": "Application Manifest",
+      "required": true,
+      "helpMarkdown": "File name uses in recursive search from working directory"
+    },
+        {
+      "name": "NewProviderURL",
+      "type": "string",
+      "label": "New Provider Url",
+      "required": true
+    },
+        {
+      "name": "Cert",
+      "type": "filePath",
+      "label": "Signing Certificate",
+      "required": true
+    },
+
+        {
+      "name": "CertPass",
+      "type": "string",
+      "label": "Signing Certificate Password",
+      "required": true
+    }, 
+         {  
+             "name": "workingFolder",  
+             "type": "filePath",  
+             "label": "Working folder",  
+             "defaultValue":"",  
+             "required":false, 
+             "helpMarkDown": "Current working directory when script is run.  Defaults to the folder where the script is located."
+        } 
+
+  ],
+  "execution": {
+    "PowerShell": {
+      "target": "$(currentDirectory)\\Mage.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(workingFolder)"
+    }
+  }
+}
