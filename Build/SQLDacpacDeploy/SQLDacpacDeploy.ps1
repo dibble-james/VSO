@@ -100,10 +100,10 @@ foreach($resource in $resources)
             $action = "Publish";
         }
 
-        $targetScript = "$sqlServer-Update.sql";
+        $targetScript = "$($System.DefaultWorkingDirectory)/$sqlServer-Update.sql";
 
         $sqlPackageArgs = "/a:$action /OutputPath:`"$targetScript`" /SourceFile:`"$Dacpac`" /TargetServerName:`"$sqlServer`" /TargetDatabaseName:`"$Database`" /TargetUser:`"$sqlUser`" /TargetPassword:`"$sqlPassword`" $AdditonalSqlPackageParameters"
-        Write-Output "SQLPackage args`n$sqlPackageArgs"
+        Write-Output ("SQLPackage args`n$sqlPackageArgs" -replace $sqlPassword,"*******")
         $sqlPackageProcess = Start-Process sqlpackage -Verbose -NoNewWindow -PassThru -Wait -ArgumentList $sqlPackageArgs
         if(-not($sqlPackageProcess.ExitCode -eq 0))
         {
@@ -111,7 +111,7 @@ foreach($resource in $resources)
         }
 
         $sqlCmdArgs = "-r 1 -b -S `"$sqlServer`" -d `"$Database`" -U `"$sqlUser`" -P `"$sqlPassword`" -i `"$targetScript`" $AdditonalSqlCmdParameters"
-        Write-Output "SQLCMD args`n$sqlCmdArgs"
+        Write-Output ("SQLCMD args`n$sqlCmdArgs" -replace $sqlPassword,"*******")
         $sqlCommandProcess = Start-Process sqlcmd -Verbose -NoNewWindow -PassThru -Wait -ArgumentList $sqlCmdArgs
         if(-not($sqlCommandProcess.ExitCode -eq 0))
         {
