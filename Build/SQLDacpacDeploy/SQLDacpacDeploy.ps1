@@ -100,7 +100,7 @@ foreach($resource in $resources)
             $action = "Publish";
         }
 
-        $targetScript = "$($System.DefaultWorkingDirectory)/$sqlServer-Update.sql";
+        $targetScript = "$($env:SYSTEM_DEFAULTWORKINGDIRECTORY)/$sqlServer-Update.sql";
 
         $sqlPackageArgs = "/a:$action /OutputPath:`"$targetScript`" /SourceFile:`"$Dacpac`" /TargetServerName:`"$sqlServer`" /TargetDatabaseName:`"$Database`" /TargetUser:`"$sqlUser`" /TargetPassword:`"$sqlPassword`" $AdditonalSqlPackageParameters"
         Write-Output ("SQLPackage args`n$sqlPackageArgs" -replace $sqlPassword,"*******")
@@ -110,14 +110,17 @@ foreach($resource in $resources)
             throw "SQLPackage Failed"
         }
 
-        $sqlCmdArgs = "-r 1 -b -S `"$sqlServer`" -d `"$Database`" -U `"$sqlUser`" -P `"$sqlPassword`" -i `"$targetScript`" $AdditonalSqlCmdParameters"
-        Write-Output ("SQLCMD args`n$sqlCmdArgs" -replace $sqlPassword,"*******")
-        $sqlCommandProcess = Start-Process sqlcmd -Verbose -NoNewWindow -PassThru -Wait -ArgumentList $sqlCmdArgs
-        if(-not($sqlCommandProcess.ExitCode -eq 0))
+        if($action -eq "Script")
         {
-            throw "SQLCmd Failed"
+            $sqlCmdArgs = "-r 1 -b -S `"$sqlServer`" -d `"$Database`" -U `"$sqlUser`" -P `"$sqlPassword`" -i `"$targetScript`" $AdditonalSqlCmdParameters"
+            Write-Output ("SQLCMD args`n$sqlCmdArgs" -replace $sqlPassword,"*******")
+            $sqlCommandProcess = Start-Process sqlcmd -Verbose -NoNewWindow -PassThru -Wait -ArgumentList $sqlCmdArgs
+            if(-not($sqlCommandProcess.ExitCode -eq 0))
+            {
+                throw "SQLCmd Failed"
+            }
         }
-
+        
         Write-Output "Sucessfully Deployed to $sqlServer/$Database"
     }
     catch
