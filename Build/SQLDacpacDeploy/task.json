@@ -1,7 +1,7 @@
 {
-  "id": "ffe7ae29-74ee-46fa-bdae-87c0b481e4c5",
-  "name": "MSDeplopy",
-  "friendlyName": "SQLDacpacDeploy",
+  "id": "10fd0410-1746-4d66-b7a1-646dbeecf7ff",
+  "name": "SQLDacpacDeploy",
+  "friendlyName": "SQL Dacpac Deploy",
   "description": "Use SQLPackage to deploy a DACPAC to remote machine",
   "author": "James Dibble",
   "category": "Deploy",
@@ -12,7 +12,7 @@
   "version": {
     "Major": "0",
     "Minor": "1",
-    "Patch": "0"
+    "Patch": "8"
   },
   "minimumAgentVersion": "1.83.0",
   "instanceNameFormat": "Deploy DACPAC: $(Dacpac)",
@@ -56,10 +56,28 @@
       "required": true
     },
     {
-      "name": "AdditonalParameters",
+        "name":"DeploymentMethod",
+        "type":"radio",
+        "label":"Deployment Method",
+        "required":true,
+        "helpMarkDown": "How the DACPAC upgrade should be performed.  If the SQL user doesn't have `sysadmin` rights, you will need to use **Script**",
+        "defaultValue":"script",
+        "options": {
+            "script":"Script",
+            "publish":"Publish"
+        }
+    },
+    {
+      "name": "AdditonalSqlPackageParameters",
       "type": "string",
-      "label": "Additional Parameters",
-      "required": true
+      "label": "Additional SqlParameter.exe Parameters",
+      "required": false
+    },
+    {
+      "name": "AdditonalSqlCmdParameters",
+      "type": "string",
+      "label": "Additional SqlCmd.exe Parameters",
+      "required": false
     }
   ],
   "sourceDefinitions": [
