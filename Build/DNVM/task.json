@@ -1,0 +1,34 @@
+{
+  "id": "c8bb628e-0960-44a0-bf54-1f2169a9b08f",
+  "name": "DNVM",
+  "friendlyName": "DNVM DNU",
+  "description": "Restore the DNVM and use the DNU to restore",
+  "author": "James Dibble",
+  "category": "Utility",
+  "visibility": [
+    "Build"
+  ],
+  "demands": [ ],
+  "version": {
+    "Major": "0",
+    "Minor": "0",
+    "Patch": "2"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "instanceNameFormat": "DNVM DNU",
+  "inputs": [
+    {
+      "name": "WorkingDirectory",
+      "type": "filePath",
+      "label": "Choose a directory that DNU Restore will be called upon",
+      "required": true
+    }
+  ],
+  "execution": {
+    "PowerShell": {
+      "target": "$(currentDirectory)\\DNVM.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(WorkingDirectory)"
+    }
+  }
+}
