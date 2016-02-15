@@ -8,7 +8,8 @@ param(
     [Parameter()][string] $ResourceFilter,
     [Parameter()][string] $AgentType = "MSDepSvc",
     [Parameter()][string] $AllowUntrusted,
-    [Parameter()][string] $MergeBuildVariables
+    [Parameter()][string] $MergeBuildVariables,
+    [Parameter()][string] $WMSvcSite
 )
 
 import-module "Microsoft.TeamFoundation.DistributedTask.Task.Internal" 
@@ -18,6 +19,7 @@ Import-Module "Microsoft.TeamFoundation.DistributedTask.Task.Deployment.Internal
 
 Write-Output "Deploying $WebDeployPackage"
 Write-Verbose "PackageDestinations = $PackageDestinations" -Verbose
+Write-Verbose "WMSvcSite = $WMSvcSite" -Verbose
 Write-Verbose "VirtualDirectory = $VirtualDirectory" -Verbose
 Write-Verbose "PackageParameters = $PackageParameters" -Verbose
 Write-Verbose "AgentType = $AgentType" -Verbose
@@ -156,7 +158,7 @@ foreach($resource in $resources)
 
         $settingsFilename = "$WebDeployPackage.$machine.publishsettings"
 
-        New-WDPublishSettings -AllowUntrusted:$skipCaCheck -EncryptPassword -ComputerName $machine -UserId $resourceProperties.credential.UserName -Password  $resourceProperties.credential.Password -FileName "$settingsFilename" -AgentType $AgentType -Site $VirtualDirectory
+        New-WDPublishSettings -AllowUntrusted:$skipCaCheck -EncryptPassword -ComputerName $machine -UserId $resourceProperties.credential.UserName -Password  $resourceProperties.credential.Password -FileName "$settingsFilename" -AgentType $AgentType -Site $WMSvcSite
 
         Write-Verbose "Using $settingsFilename" -Verbose
 
