@@ -1,0 +1,78 @@
+{
+  "id": "71f3cdf0-e2cb-11e5-9def-716fe3fa466c",
+  "name": "RollbarDeploy",
+  "friendlyName": "Rollbar Deploy",
+  "description": "Notify Rollbar of a deployment",
+  "author": "James Dibble",
+  "helpMarkDown": "[See More](https://rollbar.com/docs/deploys_powershell/)",
+  "category": "Deploy",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "0",
+    "Minor": "1",
+    "Patch": "2"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "optionals",
+      "displayName": "Optional Arguments",
+      "isExpanded": true
+    }
+  ],
+  "instanceNameFormat": "Notify Rollbar of a deployment",
+  "inputs": [
+    {
+      "name": "RollbarAccessToken",
+      "type": "string",
+      "label": "Rollbar Access Token",
+      "required": true
+    },
+    {
+      "name": "Environment",
+      "type": "string",
+      "label": "Environment",
+      "defaultValue": "$(Release.EnvironmentName)",
+      "required": true
+    },
+    {
+      "name": "Revision",
+      "type": "string",
+      "label": "Revision",
+      "defaultValue": "$(Release.ReleaseName)",
+      "required": true
+    },
+    {
+      "name": "LocalUsername",
+      "type": "string",
+      "label": "Local Username",
+      "groupName": "optionals",
+      "required": false
+    },
+    {
+      "name": "RollbarUsername",
+      "type": "string",
+      "label": "Rollbar Username",
+      "groupName": "optionals",
+      "required": false
+    },
+    {
+      "name": "Comment",
+      "type": "string",
+      "label": "Comment",
+      "groupName": "optionals",
+      "required": false
+    }    
+  ],
+  "execution": {
+    "PowerShell": {
+      "target": "$(currentDirectory)\\RollbarDeploy.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(currentDirectory)"
+    }
+  }
+}
