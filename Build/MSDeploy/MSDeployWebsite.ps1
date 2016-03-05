@@ -9,7 +9,8 @@ param(
     [Parameter()][string] $AgentType = "MSDepSvc",
     [Parameter()][string] $AllowUntrusted,
     [Parameter()][string] $MergeBuildVariables,
-    [Parameter()][string] $WMSvcSite
+    [Parameter()][string] $WMSvcSite,
+    [Parameter()][string] $SkipDirectories
 )
 
 import-module "Microsoft.TeamFoundation.DistributedTask.Task.Internal" 
@@ -25,6 +26,7 @@ Write-Verbose "PackageParameters = $PackageParameters" -Verbose
 Write-Verbose "AgentType = $AgentType" -Verbose
 Write-Verbose "AllowUntrusted = $AllowUntrusted" -Verbose
 Write-Verbose "MergeBuildVariables = $MergeBuildVariables" -Verbose
+Write-Verbose "SkipDirectories = $SkipDirectories" -Verbose
 
 Add-PSSnapin WDeploySnapin3.0
 
@@ -54,10 +56,6 @@ Write-Verbose "Explicit Package Parameters $explicitParametersVerbose" -Verbose
 $deploymentParameters = Get-WDParameters $WebDeployPackage
 
 $environmentVariables = Get-ChildItem Env:
-
-$environmentVariablesVerbose = ($environmentVariables | Out-String)
-
-Write-Verbose "Environment Variables Parameters $environmentVariablesVerbose" -Verbose
 
 $mergedDeploymentParameters = @{};
 
@@ -162,12 +160,12 @@ foreach($resource in $resources)
 
         Write-Verbose "Using $settingsFilename" -Verbose
 
-        Restore-WDPackage -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -Parameters $mergedDeploymentParameters -Verbose
+        Restore-WDApp -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -SkipFolderList @($SkipDirectories) -Parameters $mergedDeploymentParameters -Verbose
 
         Write-Output "Sucessfully Deployed to $machine"
     }
     catch
     {
-        throw "Failed to deploy to $machine//$VirtualDirectory"
+        throw "Failed to deploy to $machine//$VirtualDirectory`n$_"
     }
 }
