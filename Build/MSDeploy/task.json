@@ -1,7 +1,7 @@
 {
   "id": "ffe7ae29-74ee-46fa-bdae-87c0b481e4c5",
-  "name": "MSDeplopy",
-  "friendlyName": "MSDeplopy",
+  "name": "MSDeploy",
+  "friendlyName": "MSDeploy",
   "description": "Use MSDeplopy to deploy Web Deploy to remote machine",
   "author": "James Dibble",
   "category": "Deploy",
@@ -11,8 +11,8 @@
   "demands": [ ],
   "version": {
     "Major": "1",
-    "Minor": "1",
-    "Patch": "10"
+    "Minor": "3",
+    "Patch": "0"
   },
   "minimumAgentVersion": "1.83.0",
   "instanceNameFormat": "Deploy Web Package: $(WebDeployPackage)",

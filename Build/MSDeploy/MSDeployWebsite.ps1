@@ -156,12 +156,19 @@ foreach($resource in $resources)
 
         $settingsFilename = "$WebDeployPackage.$machine.publishsettings"
 
-        New-WDPublishSettings -AllowUntrusted:$skipCaCheck -EncryptPassword -ComputerName $machine -UserId $resourceProperties.credential.UserName -Password  $resourceProperties.credential.Password -FileName "$settingsFilename" -AgentType $AgentType -Site $WMSvcSite
-
+        if($AgentType -eq "wmsvc")
+        {
+            New-WDPublishSettings -AllowUntrusted:$skipCaCheck -EncryptPassword -ComputerName $machine -UserId $resourceProperties.credential.UserName -Password  $resourceProperties.credential.Password -FileName "$settingsFilename" -AgentType $AgentType -Site $WMSvcSite    
+        }
+        else 
+        {
+            New-WDPublishSettings -AllowUntrusted:$skipCaCheck -EncryptPassword -ComputerName $machine -UserId $resourceProperties.credential.UserName -Password  $resourceProperties.credential.Password -FileName "$settingsFilename" -AgentType $AgentType -Site $VirtualDirectory   
+        }
+        
         Write-Verbose "Using $settingsFilename" -Verbose
 
-        Restore-WDApp -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -SkipFolderList @($SkipDirectories) -Parameters $mergedDeploymentParameters -Verbose
-
+        Restore-WDPackage -Package $WebDeployPackage -DestinationPublishSettings $settingsFilename -ErrorAction Stop -SkipFolderList @($SkipDirectories) -Parameters $mergedDeploymentParameters -Verbose   
+        
         Write-Output "Sucessfully Deployed to $machine"
     }
     catch
